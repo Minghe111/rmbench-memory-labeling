@@ -1,0 +1,38 @@
+{
+  "schema": "rmbench.memory-review.v1",
+  "episodes": [
+    {
+      "task_id": "synthetic_cover_example",
+      "collection": "synthetic",
+      "episode_id": "synthetic_0",
+      "frame_count": 6,
+      "scope": "complete",
+      "source_subtasks": [
+        {"start": 0, "end": 6, "text": "Open the lid."}
+      ],
+      "stages": [
+        {
+          "subtask_index": 0,
+          "observable_onset": 2,
+          "outcome_frame": 4,
+          "handoff_frame": null,
+          "evidence": {
+            "observable_onset": [{"frame": 2, "camera": "head"}],
+            "outcome_frame": [{"frame": 4, "camera": "right_wrist"}]
+          }
+        }
+      ],
+      "snapshots": [
+        {"frame": 0, "memory": "The red block is under the right lid.", "evidence": [{"frame": 0, "camera": "head"}]},
+        {"frame": 2, "memory": "The red block is visible. The gripper is holding the lid.", "evidence": [{"frame": 2, "camera": "head"}]},
+        {"frame": 4, "memory": "The red block is visible. The lid has been set down beside it.", "evidence": [{"frame": 4, "camera": "right_wrist"}]},
+        {"frame": 5, "memory": "The red block remains uncovered. The lid is beside it.", "evidence": [{"frame": 5, "camera": "head"}]}
+      ],
+      "decisions": [
+        {"frame": 0, "prev_decision_frame": null, "memory_frame": 0, "previous_memory_frame": null, "supervise_memory": true, "supervise_subtask": true},
+        {"frame": 3, "prev_decision_frame": 0, "memory_frame": 2, "previous_memory_frame": 0, "supervise_memory": true, "supervise_subtask": true},
+        {"frame": 5, "prev_decision_frame": 3, "memory_frame": 5, "previous_memory_frame": 2, "supervise_memory": true, "supervise_subtask": false}
+      ]
+    }
+  ]
+}

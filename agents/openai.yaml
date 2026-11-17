@@ -1,0 +1,4 @@
+interface:
+  display_name: "RMBench 记忆标注"
+  short_description: "按三相机与原始时间证据复标机器人轨迹的记忆和阶段结果"
+  default_prompt: "使用 $rmbench-memory-labeling 逐帧复核指定 RMBench 轨迹的记忆标注。"
