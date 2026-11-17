@@ -16,12 +16,12 @@ Python 3.11 or newer runs the annotation validator. Install the optional rendere
 
 ```bash
 python -m pip install -r requirements.txt
-python scripts/render_evidence.py path/to/episode.hdf5 --frames 100 110 120 \
+python scripts/render_evidence.py path/to/episode.hdf5 --window-end 120 \
   --output evidence.png --metadata evidence.json
 python scripts/validate_annotation.py examples/synthetic-review.json
 ```
 
-The renderer reads all three synchronized camera streams by default. The validation command checks structure, source interval alignment when supplied, and causality. Review the underlying images to establish the meaning of an annotation. See the [task guide](references/task-rules.md) and [annotation schema](references/annotation-schema.md).
+The renderer reads all three synchronized camera streams by default. `--window-end 120` shows raw frames 117 through 120, with one row per frame and one column per camera. To compare individually selected frames, use `--frames 100 110 120`. The validation command checks structure, source interval alignment when supplied, and causality. Review the underlying images to establish the meaning of an annotation. See the [task guide](references/task-rules.md) and [annotation schema](references/annotation-schema.md).
 
 ## 中文简要说明
 

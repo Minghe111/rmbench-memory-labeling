@@ -136,7 +136,12 @@ def write_atomic(path: Path, write) -> None:
 def main() -> None:
     parser = ArgumentParser(description=__doc__)
     parser.add_argument('episode', type=Path, help='Raw RMBench episode HDF5')
-    parser.add_argument('--frames', type=int, nargs='+', required=True, help='Zero-based raw frame indices')
+    selection = parser.add_mutually_exclusive_group(required=True)
+    selection.add_argument('--frames', type=int, nargs='+', help='Zero-based raw frame indices')
+    selection.add_argument(
+        '--window-end', type=int,
+        help='Render the four consecutive raw frames ending at this index (fewer at episode start)',
+    )
     parser.add_argument('--cameras', nargs='+', choices=tuple(CAMERAS), default=list(CAMERAS))
     parser.add_argument('--output', type=Path, required=True, help='Evidence PNG path')
     parser.add_argument('--metadata', type=Path, help='Optional JSON with per-frame RGB checksums')
@@ -154,7 +159,12 @@ def main() -> None:
     if len(set(paths)) != len(paths):
         parser.error('Input HDF5, output PNG, and metadata paths must be distinct')
 
-    frames = sorted(set(args.frames))
+    if args.window_end is None:
+        frames = sorted(set(args.frames))
+    else:
+        if args.window_end < 0:
+            parser.error('--window-end must be a nonnegative raw frame index')
+        frames = list(range(max(0, args.window_end - 3), args.window_end + 1))
     roles = list(dict.fromkeys(args.cameras))
     try:
         tiles = collect(episode, frames, roles)
