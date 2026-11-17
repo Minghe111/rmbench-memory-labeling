@@ -1,0 +1,116 @@
+{"schema": "rmbench.memory-review.v1", "episodes": [
+    {
+      "task_id": "synthetic_button",
+      "collection": "synthetic",
+      "episode_id": "invented_0",
+      "frame_count": 7,
+      "scope": "complete",
+      "source_subtasks": [
+        {"start": 0, "end": 4, "text": "Press the button."},
+        {"start": 4, "end": 7, "text": "Return the block to its initial mat."}
+      ],
+      "stages": [
+        {"subtask_index": 0, "observable_onset": 1, "outcome_frame": 2, "handoff_frame": 4, "evidence": {"observable_onset": [{"frame": 1, "camera": "left_wrist"}], "outcome_frame": [{"frame": 2, "camera": "left_wrist"}], "handoff_frame": [{"frame": 4, "camera": "left_wrist"}]}},
+        {"subtask_index": 1, "observable_onset": 4, "outcome_frame": 6, "handoff_frame": null, "evidence": {"observable_onset": [{"frame": 4, "camera": "right_wrist"}], "outcome_frame": [{"frame": 6, "camera": "right_wrist"}]}}
+      ],
+      "facts": [
+        {"id": "origin", "kind": "binding", "subject": "red_block", "predicate": "initial_location", "value": "front_mat", "start": 0, "end": null, "evidence": [{"frame": 0, "camera": "head"}], "required_in_memory": true},
+        {"id": "press_in_progress", "kind": "state", "subject": "left_gripper", "predicate": "activity", "value": "pressing", "start": 1, "end": 2, "evidence": [{"frame": 1, "camera": "left_wrist"}], "end_evidence": [{"frame": 2, "camera": "left_wrist"}]},
+        {"id": "pressed", "kind": "outcome", "subject": "button_press", "predicate": "result", "value": "pressed", "start": 2, "end": null, "evidence": [{"frame": 2, "camera": "left_wrist"}], "required_in_memory": true},
+        {"id": "retreat", "kind": "state", "subject": "left_gripper", "predicate": "activity", "value": "retreating", "start": 2, "end": 4, "evidence": [{"frame": 2, "camera": "left_wrist"}], "end_evidence": [{"frame": 4, "camera": "left_wrist"}]},
+        {"id": "return_in_progress", "kind": "state", "subject": "right_gripper", "predicate": "activity", "value": "returning_block", "start": 4, "end": 6, "evidence": [{"frame": 4, "camera": "right_wrist"}], "end_evidence": [{"frame": 6, "camera": "right_wrist"}]},
+        {"id": "returned", "kind": "outcome", "subject": "return_block", "predicate": "result", "value": "resting_on_front_mat", "start": 6, "end": null, "evidence": [{"frame": 6, "camera": "right_wrist"}]}
+      ],
+      "snapshots": [
+        {"frame": 0, "memory": "The red block started on the front mat.", "evidence": [{"frame": 0, "camera": "head"}], "claims": [{"text": "The red block started on the front mat.", "facts": ["origin"]}]},
+        {"frame": 1, "memory": "The red block started on the front mat. The left gripper is pressing the button.", "evidence": [{"frame": 1, "camera": "left_wrist"}], "claims": [{"text": "The red block started on the front mat.", "facts": ["origin"]}, {"text": "The left gripper is pressing the button.", "facts": ["press_in_progress"]}]},
+        {"frame": 2, "memory": "The red block started on the front mat. The button has been pressed. The left arm is withdrawing.", "evidence": [{"frame": 2, "camera": "left_wrist"}], "claims": [{"text": "The red block started on the front mat.", "facts": ["origin"]}, {"text": "The button has been pressed.", "facts": ["pressed"]}, {"text": "The left arm is withdrawing.", "facts": ["retreat"]}]},
+        {"frame": 4, "memory": "The red block started on the front mat. The button has been pressed. The right gripper is returning the red block.", "evidence": [{"frame": 4, "camera": "right_wrist"}], "claims": [{"text": "The red block started on the front mat.", "facts": ["origin"]}, {"text": "The button has been pressed.", "facts": ["pressed"]}, {"text": "The right gripper is returning the red block.", "facts": ["return_in_progress"]}]},
+        {"frame": 6, "memory": "The red block started on the front mat. The button has been pressed. The block is back on its original mat.", "evidence": [{"frame": 6, "camera": "right_wrist"}], "claims": [{"text": "The red block started on the front mat.", "facts": ["origin"]}, {"text": "The button has been pressed.", "facts": ["pressed"]}, {"text": "The block is back on its original mat.", "facts": ["returned"]}]}
+      ],
+      "decisions": [
+        {"frame": 0, "prev_decision_frame": null, "memory_frame": 0, "previous_memory_frame": null, "supervise_memory": true, "supervise_subtask": true},
+        {"frame": 2, "prev_decision_frame": 0, "memory_frame": 2, "previous_memory_frame": 0, "supervise_memory": true, "supervise_subtask": true},
+        {"frame": 5, "prev_decision_frame": 2, "memory_frame": 4, "previous_memory_frame": 2, "supervise_memory": true, "supervise_subtask": true},
+        {"frame": 6, "prev_decision_frame": 5, "memory_frame": 6, "previous_memory_frame": 4, "supervise_memory": true, "supervise_subtask": false}
+      ]
+    },
+    {
+      "task_id": "synthetic_cover",
+      "collection": "synthetic",
+      "episode_id": "invented_0",
+      "frame_count": 8,
+      "scope": "complete",
+      "source_subtasks": [
+        {"start": 0, "end": 4, "text": "Cover the red block."},
+        {"start": 4, "end": 8, "text": "Uncover the red block."}
+      ],
+      "stages": [
+        {"subtask_index": 0, "observable_onset": 1, "outcome_frame": 3, "handoff_frame": 4, "evidence": {"observable_onset": [{"frame": 1, "camera": "head"}], "outcome_frame": [{"frame": 3, "camera": "head"}], "handoff_frame": [{"frame": 4, "camera": "head"}]}},
+        {"subtask_index": 1, "observable_onset": 5, "outcome_frame": 7, "handoff_frame": null, "evidence": {"observable_onset": [{"frame": 5, "camera": "head"}], "outcome_frame": [{"frame": 7, "camera": "head"}]}}
+      ],
+      "facts": [
+        {"id": "red_on_right", "kind": "binding", "subject": "right_block", "predicate": "identity", "value": "red_block", "start": 0, "end": null, "evidence": [{"frame": 0, "camera": "head"}]},
+        {"id": "initially_visible", "kind": "state", "subject": "right_block", "predicate": "visibility", "value": "visible", "start": 0, "end": 1, "evidence": [{"frame": 0, "camera": "head"}], "end_evidence": [{"frame": 1, "camera": "head"}]},
+        {"id": "cover_partial", "kind": "state", "subject": "right_block", "predicate": "visibility", "value": "partial", "start": 1, "end": 2, "evidence": [{"frame": 1, "camera": "head"}], "end_evidence": [{"frame": 2, "camera": "head"}]},
+        {"id": "moving_lid_occlusion", "kind": "state", "subject": "right_block", "predicate": "visibility", "value": "obscured_by_moving_lid", "start": 2, "end": 3, "evidence": [{"frame": 2, "camera": "head"}], "end_evidence": [{"frame": 3, "camera": "head"}]},
+        {"id": "covered", "kind": "state", "subject": "right_block", "predicate": "visibility", "value": "covered_by_settled_lid", "start": 3, "end": 5, "evidence": [{"frame": 3, "camera": "head"}], "end_evidence": [{"frame": 5, "camera": "head"}]},
+        {"id": "cover_completed", "kind": "outcome", "subject": "cover_right_block", "predicate": "result", "value": "lid_seated_after_release", "start": 3, "end": null, "evidence": [{"frame": 3, "camera": "head"}]},
+        {"id": "uncover_partial", "kind": "state", "subject": "right_block", "predicate": "visibility", "value": "partial", "start": 5, "end": 6, "evidence": [{"frame": 5, "camera": "head"}], "end_evidence": [{"frame": 6, "camera": "head"}]},
+        {"id": "visible_after_lift", "kind": "state", "subject": "right_block", "predicate": "visibility", "value": "visible", "start": 6, "end": null, "evidence": [{"frame": 6, "camera": "head"}]},
+        {"id": "uncover_completed", "kind": "outcome", "subject": "uncover_right_block", "predicate": "result", "value": "lid_set_aside", "start": 7, "end": null, "evidence": [{"frame": 7, "camera": "right_wrist"}]}
+      ],
+      "snapshots": [
+        {"frame": 0, "memory": "The right block is red. The whole red block is visible.", "evidence": [{"frame": 0, "camera": "head"}], "claims": [{"text": "The right block is red.", "facts": ["red_on_right"]}, {"text": "The whole red block is visible.", "facts": ["initially_visible"]}]},
+        {"frame": 1, "memory": "The right block is red. The descending lid obscures part of the red block.", "evidence": [{"frame": 1, "camera": "head"}], "claims": [{"text": "The right block is red.", "facts": ["red_on_right"]}, {"text": "The descending lid obscures part of the red block.", "facts": ["cover_partial"]}]},
+        {"frame": 2, "memory": "The right block is red. The held lid blocks the red block from view.", "evidence": [{"frame": 2, "camera": "head"}], "claims": [{"text": "The right block is red.", "facts": ["red_on_right"]}, {"text": "The held lid blocks the red block from view.", "facts": ["moving_lid_occlusion"]}]},
+        {"frame": 3, "memory": "The right block is red. The lid is seated over the red block after release.", "evidence": [{"frame": 3, "camera": "head"}], "claims": [{"text": "The right block is red.", "facts": ["red_on_right"]}, {"text": "The lid is seated over the red block after release.", "facts": ["covered", "cover_completed"]}]},
+        {"frame": 5, "memory": "The right block is red. An edge of the red block is now visible beneath the lifted lid.", "evidence": [{"frame": 5, "camera": "head"}], "claims": [{"text": "The right block is red.", "facts": ["red_on_right"]}, {"text": "An edge of the red block is now visible beneath the lifted lid.", "facts": ["uncover_partial"]}]},
+        {"frame": 6, "memory": "The right block is red. The whole red block is visible.", "evidence": [{"frame": 6, "camera": "head"}], "claims": [{"text": "The right block is red.", "facts": ["red_on_right"]}, {"text": "The whole red block is visible.", "facts": ["visible_after_lift"]}]},
+        {"frame": 7, "memory": "The right block is red. The red block is uncovered and the lid has been set aside.", "evidence": [{"frame": 7, "camera": "right_wrist"}], "claims": [{"text": "The right block is red.", "facts": ["red_on_right"]}, {"text": "The red block is uncovered and the lid has been set aside.", "facts": ["visible_after_lift", "uncover_completed"]}]}
+      ],
+      "decisions": [
+        {"frame": 0, "prev_decision_frame": null, "memory_frame": 0, "previous_memory_frame": null, "supervise_memory": true, "supervise_subtask": true},
+        {"frame": 2, "prev_decision_frame": 0, "memory_frame": 2, "previous_memory_frame": 0, "supervise_memory": true, "supervise_subtask": true},
+        {"frame": 4, "prev_decision_frame": 2, "memory_frame": 3, "previous_memory_frame": 2, "supervise_memory": true, "supervise_subtask": true},
+        {"frame": 6, "prev_decision_frame": 4, "memory_frame": 6, "previous_memory_frame": 3, "supervise_memory": true, "supervise_subtask": true},
+        {"frame": 7, "prev_decision_frame": 6, "memory_frame": 7, "previous_memory_frame": 6, "supervise_memory": true, "supervise_subtask": false}
+      ]
+    },
+    {
+      "task_id": "synthetic_battery",
+      "collection": "synthetic",
+      "episode_id": "invented_0",
+      "frame_count": 5,
+      "scope": "complete",
+      "source_subtasks": [
+        {"start": 0, "end": 2, "text": "Insert the two batteries."},
+        {"start": 2, "end": 5, "text": "Retry the right slot."}
+      ],
+      "stages": [
+        {"subtask_index": 0, "observable_onset": 0, "outcome_frame": 1, "handoff_frame": 2, "evidence": {"observable_onset": [{"frame": 0, "camera": "head"}], "outcome_frame": [{"frame": 1, "camera": "head"}], "handoff_frame": [{"frame": 2, "camera": "head"}]}},
+        {"subtask_index": 1, "observable_onset": 2, "outcome_frame": 4, "handoff_frame": null, "evidence": {"observable_onset": [{"frame": 2, "camera": "head"}], "outcome_frame": [{"frame": 4, "camera": "head"}]}}
+      ],
+      "facts": [
+        {"id": "left_seated", "kind": "state", "subject": "left_slot", "predicate": "occupancy", "value": "seated", "start": 0, "end": null, "evidence": [{"frame": 0, "camera": "head"}]},
+        {"id": "first_insertion", "kind": "outcome", "subject": "right_insertion_1", "predicate": "result", "value": "slot_empty", "start": 1, "end": null, "evidence": [{"frame": 1, "camera": "head"}], "required_in_memory": true},
+        {"id": "needle_up", "kind": "state", "subject": "meter", "predicate": "reading", "value": "up", "start": 0, "end": 2, "evidence": [{"frame": 0, "camera": "head"}], "end_evidence": [{"frame": 2, "camera": "head"}]},
+        {"id": "meter_occluded", "kind": "state", "subject": "meter", "predicate": "reading", "value": "occluded", "start": 2, "end": 4, "evidence": [{"frame": 2, "camera": "head"}], "end_evidence": [{"frame": 4, "camera": "head"}]},
+        {"id": "right_seated", "kind": "state", "subject": "right_slot", "predicate": "occupancy", "value": "seated", "start": 3, "end": null, "evidence": [{"frame": 3, "camera": "head"}]},
+        {"id": "needle_left", "kind": "state", "subject": "meter", "predicate": "reading", "value": "left", "start": 4, "end": null, "evidence": [{"frame": 4, "camera": "head"}]},
+        {"id": "second_insertion", "kind": "outcome", "subject": "right_insertion_2", "predicate": "result", "value": "seated", "start": 4, "end": null, "evidence": [{"frame": 4, "camera": "head"}]}
+      ],
+      "snapshots": [
+        {"frame": 0, "memory": "The left battery is seated. The meter needle points up.", "evidence": [{"frame": 0, "camera": "head"}], "claims": [{"text": "The left battery is seated.", "facts": ["left_seated"]}, {"text": "The meter needle points up.", "facts": ["needle_up"]}]},
+        {"frame": 1, "memory": "The left battery is seated. The first attempt left the right slot empty. The meter needle points up.", "evidence": [{"frame": 1, "camera": "head"}], "claims": [{"text": "The left battery is seated.", "facts": ["left_seated"]}, {"text": "The first attempt left the right slot empty.", "facts": ["first_insertion"]}, {"text": "The meter needle points up.", "facts": ["needle_up"]}]},
+        {"frame": 2, "memory": "The first attempt left the right slot empty. The meter is occluded.", "evidence": [{"frame": 2, "camera": "head"}], "claims": [{"text": "The first attempt left the right slot empty.", "facts": ["first_insertion"]}, {"text": "The meter is occluded.", "facts": ["meter_occluded"]}]},
+        {"frame": 3, "memory": "The first attempt left the right slot empty. Both batteries are now seated. The meter is occluded.", "evidence": [{"frame": 3, "camera": "head"}], "claims": [{"text": "The first attempt left the right slot empty.", "facts": ["first_insertion"]}, {"text": "Both batteries are now seated.", "facts": ["left_seated", "right_seated"]}, {"text": "The meter is occluded.", "facts": ["meter_occluded"]}]},
+        {"frame": 4, "memory": "The first attempt left the right slot empty. After the retry, both batteries are seated. The meter needle points left.", "evidence": [{"frame": 4, "camera": "head"}], "claims": [{"text": "The first attempt left the right slot empty.", "facts": ["first_insertion"]}, {"text": "After the retry, both batteries are seated.", "facts": ["left_seated", "right_seated", "second_insertion"]}, {"text": "The meter needle points left.", "facts": ["needle_left"]}]}
+      ],
+      "decisions": [
+        {"frame": 0, "prev_decision_frame": null, "memory_frame": 0, "previous_memory_frame": null, "supervise_memory": true, "supervise_subtask": true},
+        {"frame": 2, "prev_decision_frame": 0, "memory_frame": 2, "previous_memory_frame": 0, "supervise_memory": true, "supervise_subtask": true},
+        {"frame": 4, "prev_decision_frame": 2, "memory_frame": 4, "previous_memory_frame": 2, "supervise_memory": true, "supervise_subtask": false}
+      ]
+    }
+]}

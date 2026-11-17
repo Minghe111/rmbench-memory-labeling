@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Check the structure and causal references of a local RMBench review."""
+"""Check the structure, causal references, and declared facts of a local RMBench review."""
 from argparse import ArgumentParser
 from bisect import bisect_right
-from collections import Counter
+from collections import Counter, defaultdict
 import json
 from pathlib import Path
 import re
@@ -11,6 +11,7 @@ import re
 SCHEMA = 'rmbench.memory-review.v1'
 CAMERAS = {'head', 'left_wrist', 'right_wrist'}
 CLOCKS = ('observable_onset', 'outcome_frame', 'handoff_frame')
+FACT_KINDS = {'binding', 'outcome', 'state'}
 
 
 class ReviewError(ValueError):
@@ -173,6 +174,107 @@ def validate_decisions(value, snapshots, count, scope, where):
     return len(entries)
 
 
+def fact_intervals(value, count, where):
+    facts = {}
+    by_property = defaultdict(list)
+    entries = rows(value, where)
+    require(entries, where, 'fact review requires at least one fact')
+    for i, raw in enumerate(entries):
+        loc = f'{where}[{i}]'
+        row = mapping(raw, loc)
+        fact_id = text(row.get('id'), loc + '.id')
+        require(fact_id not in facts, loc, f'duplicate fact ID {fact_id!r}')
+        kind = text(row.get('kind'), loc + '.kind')
+        require(kind in FACT_KINDS, loc, 'expected binding, outcome, or state')
+        subject = text(row.get('subject'), loc + '.subject')
+        predicate = text(row.get('predicate'), loc + '.predicate')
+        text(row.get('value'), loc + '.value')
+        required_in_memory = row.get('required_in_memory', False)
+        require(type(required_in_memory) is bool, loc + '.required_in_memory', 'expected a boolean')
+        start = integer(row.get('start'), 0, count - 1, loc + '.start')
+        declared_end = field(row, 'end', loc)
+        end = count if declared_end is None else integer(declared_end, start + 1, count, loc + '.end')
+        evidence(row.get('evidence'), start, loc + '.evidence')
+        end_support = row.get('end_evidence', [])
+        if end < count or end_support != []:
+            require(declared_end is not None, loc, 'a fact with no end cannot declare end evidence')
+            evidence(end_support, min(end, count - 1), loc + '.end_evidence')
+            require(max(item['frame'] for item in end_support) >= start, loc,
+                    'end evidence must reach the fact start or later')
+        facts[fact_id] = (start, end, required_in_memory)
+        by_property[kind, subject, predicate].append((start, end, fact_id))
+    for prop, intervals in by_property.items():
+        ordered = sorted(intervals)
+        for left, right in zip(ordered, ordered[1:]):
+            require(left[1] <= right[0], where,
+                    f'overlapping facts {left[2]!r} and {right[2]!r} for {prop!r}')
+    return facts
+
+
+def snapshot_claims(snapshot, frame, end, facts, where):
+    entries = rows(snapshot.get('claims'), where + '.claims')
+    require(entries, where, 'fact review requires at least one claim per Memory snapshot')
+    parts = []
+    referenced = set()
+    for i, raw in enumerate(entries):
+        loc = f'{where}.claims[{i}]'
+        claim = mapping(raw, loc)
+        parts.append(text(claim.get('text'), loc + '.text'))
+        ids = rows(claim.get('facts'), loc + '.facts')
+        require(ids, loc, 'claim must reference at least one fact')
+        seen = set()
+        for raw_id in ids:
+            fact_id = text(raw_id, loc + '.facts')
+            require(fact_id not in seen, loc, f'duplicate reference to fact {fact_id!r}')
+            require(fact_id in facts, loc, f'unknown fact {fact_id!r}')
+            start, stop, _ = facts[fact_id]
+            require(start <= frame, loc, f'fact {fact_id!r} starts at {start}, after snapshot {frame}')
+            require(end <= stop, loc,
+                    f'fact {fact_id!r} expires at {stop}, before snapshot interval [{frame}, {end}) ends')
+            seen.add(fact_id)
+        referenced.update(seen)
+    require(' '.join(' '.join(parts).split()) == ' '.join(snapshot['memory'].split()), where,
+            'claim texts must cover the Memory text in order')
+    return referenced, len(entries)
+
+
+def validate_fact_review(ep, frames, count, where, totals):
+    snapshots = ep['snapshots']
+    if 'facts' not in ep:
+        require('review_end' not in ep and all('claims' not in row for row in snapshots), where,
+                'claims and review_end require facts')
+        return
+    review_end = count
+    if 'review_end' in ep:
+        require(ep['scope'] == 'partial', where, 'review_end is only for partial fact review')
+        review_end = integer(ep['review_end'], 1, count, where + '.review_end')
+        require(frames[-1] < review_end, where, 'snapshots must be before review_end')
+        if 'decisions' in ep:
+            require(ep['decisions'][-1]['frame'] < review_end, where, 'decisions must be before review_end')
+    facts = fact_intervals(ep['facts'], count, where + '.facts')
+    required = [(fact_id, start, stop) for fact_id, (start, stop, needed) in facts.items() if needed]
+    referenced = {}
+    for i, (snapshot, frame, end) in enumerate(zip(snapshots, frames, frames[1:] + [review_end])):
+        loc = f'{where}.snapshots[{i}]'
+        references, number = snapshot_claims(snapshot, frame, end, facts, loc)
+        for fact_id, start, stop in required:
+            if start < end and frame < stop:
+                require(fact_id in references, loc,
+                        f'required fact {fact_id!r} missing from snapshot interval [{frame}, {end})')
+        referenced[frame] = references
+        totals['claims'] += number
+    totals['fact_episodes'] += 1
+    totals['facts'] += len(facts)
+    if 'decisions' in ep:
+        sampled = set()
+        for decision in ep['decisions']:
+            if decision['supervise_memory']:
+                sampled.update(referenced[decision['memory_frame']])
+        totals['facts_with_decision_trace'] += len(facts)
+        totals['facts_in_supervised_targets'] += len(sampled)
+        totals['facts_not_in_supervised_targets'] += len(facts) - len(sampled)
+
+
 def validate(document, official_annotations):
     top = mapping(document, 'document')
     require(top.get('schema') == SCHEMA, 'schema', f'expected {SCHEMA!r}')
@@ -203,6 +305,7 @@ def validate(document, official_annotations):
         frames = snapshot_frames(ep.get('snapshots'), count, scope, loc + '.snapshots')
         if 'decisions' in ep:
             totals['decisions'] += validate_decisions(ep['decisions'], frames, count, scope, loc + '.decisions')
+        validate_fact_review(ep, frames, count, loc, totals)
         totals['snapshots'] += len(frames)
         totals[scope + '_episodes'] += 1
     require(compared == official_annotations.keys(), 'official annotations',
@@ -237,6 +340,13 @@ def main():
           f"and {counts['compared_episodes']} supplied official annotation comparison(s).")
     print(f"Structurally valid. Null stage clocks: {counts['null_clocks']}. "
           'Visual claims still need image review.')
+    if counts['fact_episodes']:
+        print(f"Validated {counts['facts']} fact(s) and {counts['claims']} claim(s) "
+              f"across {counts['fact_episodes']} fact review(s).")
+    if counts['facts_with_decision_trace']:
+        print(f"Supervised Memory targets include {counts['facts_in_supervised_targets']} of "
+              f"{counts['facts_with_decision_trace']} fact(s) with a decision trace "
+              f"({counts['facts_not_in_supervised_targets']} absent).")
 
 
 if __name__ == '__main__':
